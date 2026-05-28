@@ -2,7 +2,7 @@ import re
 import unicodedata
 from typing import Annotated
 
-from pydantic import BeforeValidator, Field, validate_call
+from pydantic import BeforeValidator, Field
 
 
 def sanitize_name(data: str) -> str:
@@ -17,13 +17,3 @@ def sanitize_name(data: str) -> str:
 
 
 ClientName = Annotated[str, BeforeValidator(sanitize_name), Field(min_length=2, max_length=100)]
-
-
-if __name__ == '__main__':
-    data = 'ЁABabǅǈʰˠ中文́̈ाि҈⃝09Ⅻↂ½²_‿-—([)]«“»”!?+=$€^¨☀♞'
-
-    @validate_call
-    def create_client(name: ClientName):
-        return name
-
-    print(create_client(data))
