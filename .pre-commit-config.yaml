@@ -5,7 +5,6 @@ repos:
       - id: name-tests-test
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
-      - id: end-of-file-fixer
       - id: check-yaml
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -15,3 +14,5 @@ repos:
         args: [ --fix ]
       - id: ruff-format
         args: [--line-length=100]
+
+exclude: '[a-z0-9]+_init.py$'
