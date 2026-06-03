@@ -8,4 +8,4 @@ class Client(Base):
     __tablename__ = 'client'
 
     client_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    client_name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    client_name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
