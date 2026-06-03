@@ -6,7 +6,7 @@ from app.models.models_config import Base
 from app.models.service import Service
 
 
-class alt_price(Base):
+class Alt_price(Base):
     __tablename__ = 'alt_price'
 
     alt_price_id: Mapped[int] = mapped_column(Integer, primary_key=True)
