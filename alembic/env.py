@@ -8,7 +8,7 @@ from app.models.alt_price import Alt_price  # noqa: F401
 from app.models.client import Client  # noqa: F401
 from app.models.history import History  # noqa: F401
 from app.models.models_config import Base
-from app.models.service import Service  # noqa: F401
+from app.models.offering import Offering  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
