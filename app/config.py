@@ -27,12 +27,10 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int
     POSTGRES_DB: str
 
-    @computed_field
-    @property
-    def SQLALCHEMY_DATABASE_URL(self) -> str:
+    def _build_url(self, driver: str) -> str:
         return str(
             MultiHostUrl.build(
-                scheme='postgresql+asyncpg',
+                scheme=f'postgresql+{driver}',
                 username=self.POSTGRES_USER,
                 password=self.POSTGRES_PASSWORD,
                 host=self.POSTGRES_HOST,
@@ -40,6 +38,16 @@ class Settings(BaseSettings):
                 path=self.POSTGRES_DB,
             )
         )
+
+    @computed_field
+    @property
+    def SQLALCHEMY_DATABASE_URL(self) -> str:
+        return self._build_url('asyncpg')
+
+    @computed_field
+    @property
+    def ALEMBIC_DATABASE_URL(self) -> str:
+        return self._build_url('psycopg')
 
 
 config = Settings()  # type: ignore
