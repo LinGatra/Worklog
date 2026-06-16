@@ -7,7 +7,7 @@ from app.dependencies import db_connect
 from app.schemas.history import HistoryRead
 from app.services.history import history_service
 
-history: APIRouter = APIRouter(prefix='/history')
+history: APIRouter = APIRouter(prefix='/history', tags=['History'])
 
 
 @history.get('/', response_model=list[HistoryRead])

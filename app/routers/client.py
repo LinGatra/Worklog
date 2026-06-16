@@ -7,7 +7,7 @@ from app.dependencies import db_connect
 from app.schemas.client import ClientCreate, ClientRead, ClientUpdate
 from app.services.client import client_service
 
-client: APIRouter = APIRouter(prefix='/client')
+client: APIRouter = APIRouter(prefix='/client', tags=['Client'])
 
 
 @client.get('/', response_model=list[ClientRead])

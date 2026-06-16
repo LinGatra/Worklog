@@ -7,7 +7,7 @@ from app.dependencies import db_connect
 from app.schemas.offering import OfferingCreate, OfferingRead, OfferingUpdate
 from app.services.offering import offering_service
 
-offering: APIRouter = APIRouter(prefix='/offering')
+offering: APIRouter = APIRouter(prefix='/offering', tags=['Offering'])
 
 
 @offering.get('/', response_model=list[OfferingRead])
