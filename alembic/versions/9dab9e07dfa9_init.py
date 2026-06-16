@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 0b7da2d407ba
+Revision ID: 9dab9e07dfa9
 Revises: 
-Create Date: 2026-06-14 19:03:53.473225
+Create Date: 2026-06-16 08:17:20.531654
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '0b7da2d407ba'
+revision: str = '9dab9e07dfa9'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -40,19 +40,19 @@ def upgrade() -> None:
     sa.Column('client_id', sa.Integer(), nullable=False),
     sa.Column('offering_id', sa.Integer(), nullable=False),
     sa.Column('alt_price', sa.Integer(), nullable=False),
+    sa.CheckConstraint('alt_price >= 0', name='ck_alt_price_non_negative'),
     sa.ForeignKeyConstraint(['client_id'], ['client.client_id'], ),
     sa.ForeignKeyConstraint(['offering_id'], ['offering.offering_id'], ),
-    sa.PrimaryKeyConstraint('alt_price_id')
+    sa.PrimaryKeyConstraint('alt_price_id'),
+    sa.UniqueConstraint('client_id', 'offering_id', name='uq_client_offering_price')
     )
     op.create_table('history',
     sa.Column('event_id', sa.Integer(), nullable=False),
     sa.Column('client_id', sa.Integer(), nullable=False),
-    sa.Column('client_name', sa.String(length=100), nullable=False),
     sa.Column('offering_id', sa.Integer(), nullable=False),
     sa.Column('price', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['client_id'], ['client.client_id'], ),
-    sa.ForeignKeyConstraint(['client_name'], ['client.client_name'], ),
     sa.ForeignKeyConstraint(['offering_id'], ['offering.offering_id'], ),
     sa.PrimaryKeyConstraint('event_id')
     )

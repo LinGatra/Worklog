@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from app.config import config as app_config
-from app.models.alt_price import Alt_price  # noqa: F401
+from app.models.alt_price import AltPrice  # noqa: F401
 from app.models.client import Client  # noqa: F401
 from app.models.history import History  # noqa: F401
 from app.models.models_config import Base
