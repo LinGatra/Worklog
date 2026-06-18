@@ -17,10 +17,10 @@ class HistoryService:
         return await self.repo.get_multi(session=session)
 
     async def create(self, client_id: int, offering_id: int, session: AsyncSession) -> History:
-        new_event = await self.repo.create(
-            session=session, client_id=client_id, offering_id=offering_id
-        )
-        await session.commit()
+        async with session.begin():
+            new_event = await self.repo.create(
+                session=session, client_id=client_id, offering_id=offering_id
+            )
         return new_event
 
 
