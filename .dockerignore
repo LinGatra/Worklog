@@ -1,0 +1,9 @@
+.env
+.git
+.ruff_cache
+__pycache__
+temp/
+tests/
+nginx/
+.pre-commit-config.yaml
+.gitignore

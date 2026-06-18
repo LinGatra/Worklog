@@ -1,0 +1,56 @@
+from collections.abc import Sequence
+from typing import Any
+
+from pydantic import BaseModel
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+
+class BaseRepository[ModelType, CreateSchemaType: BaseModel, UpdateSchemaType: BaseModel]:
+    def __init__(self, model: type[ModelType]):
+        self.model = model
+
+    async def get(self, session: AsyncSession, id: Any) -> ModelType | None:
+        return await session.get(self.model, id)
+
+    async def get_multi(
+        self,
+        session: AsyncSession,
+        skip: int = 0,
+        limit: int = 100,  # Пагинация через `limit / offset`. Возможно, стоит пересмотреть в будущем, и вместо offset использовать id
+    ) -> Sequence[ModelType]:
+        statement = select(self.model).offset(skip).limit(limit)
+        result = await session.execute(statement)
+        return result.scalars().all()
+
+    async def create(self, session: AsyncSession, obj_in: CreateSchemaType) -> ModelType:
+        obj_in_data = obj_in.model_dump()
+        db_obj = self.model(**obj_in_data)
+
+        session.add(db_obj)
+
+        await session.flush()
+        return db_obj
+
+    async def update(
+        self, session: AsyncSession, db_obj: ModelType, obj_in: UpdateSchemaType | dict[str, Any]
+    ) -> ModelType:
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+        else:
+            update_data = obj_in.model_dump(exclude_unset=True)
+
+        for field in update_data:
+            if hasattr(db_obj, field):
+                setattr(db_obj, field, update_data[field])
+
+        session.add(db_obj)
+        await session.flush()
+        return db_obj
+
+    async def remove(self, session: AsyncSession, id: Any) -> ModelType | None:
+        db_obj = await session.get(self.model, id)
+        if db_obj:
+            await session.delete(db_obj)
+            await session.flush()
+        return db_obj
