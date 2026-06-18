@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.history_repository import history_repository
 from app.models.history import History
+from app.schemas.history import HistoryCreate
 
 
 class HistoryService:
@@ -16,12 +17,9 @@ class HistoryService:
     async def get_all(self, session: AsyncSession) -> Sequence[History] | None:
         return await self.repo.get_multi(session=session)
 
-    async def create(self, client_id: int, offering_id: int, session: AsyncSession) -> History:
+    async def create(self, data: HistoryCreate, session: AsyncSession) -> History:
         async with session.begin():
-            new_event = await self.repo.create(
-                session=session, client_id=client_id, offering_id=offering_id
-            )
-        return new_event
+            return await self.repo.create(session=session, data=data)
 
 
 history_service = HistoryService()

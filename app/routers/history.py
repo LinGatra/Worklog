@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import db_connect
-from app.schemas.history import HistoryRead
+from app.schemas.history import HistoryCreate, HistoryRead
 from app.services.history import history_service
 
 history: APIRouter = APIRouter(prefix='/history', tags=['History'])
@@ -20,10 +20,8 @@ async def get_by_id(session: Annotated[AsyncSession, Depends(db_connect)], id: i
     return await history_service.get_by_id(session=session, event_id=id)
 
 
-@history.post('/{client_id}/{offering_id}')
+@history.post('/', response_model=HistoryRead)
 async def create_history(
-    session: Annotated[AsyncSession, Depends(db_connect)], client_id: int, offering_id: int
+    entry: HistoryCreate, session: Annotated[AsyncSession, Depends(db_connect)]
 ):
-    return await history_service.create(
-        session=session, client_id=client_id, offering_id=offering_id
-    )
+    return await history_service.create(session=session, data=entry)

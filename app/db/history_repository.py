@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.alt_price import AltPrice
 from app.models.history import History
 from app.models.offering import Offering
+from app.schemas.history import HistoryCreate
 
 
 class HistoryRepository:
@@ -21,8 +22,9 @@ class HistoryRepository:
         result = await session.execute(statement)
         return result.scalars().all()
 
-    async def create(self, session: AsyncSession, client_id: int, offering_id: int) -> History:
-
+    async def create(self, session: AsyncSession, data: HistoryCreate) -> History:
+        client_id = data.client_id
+        offering_id = data.offering_id
         select_stmt = (
             select(
                 func.coalesce(AltPrice.alt_price, Offering.offering_price).label('price'),
