@@ -7,7 +7,7 @@ from app.dependencies import db_connect
 from app.schemas.alt_price import AltPriceCreate, AltPriceRead, AltPriceUpdate
 from app.services.alt_price import alt_price_service
 
-alt_price: APIRouter = APIRouter(prefix='/AltPrice', tags=['Alt Price'])
+alt_price: APIRouter = APIRouter(prefix='/alt-price', tags=['Alt Price'])
 
 
 @alt_price.get('/', response_model=list[AltPriceRead])
