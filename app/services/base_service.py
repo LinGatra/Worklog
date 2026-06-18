@@ -10,9 +10,9 @@ class BaseService[ModelType, CreateSchemaType, UpdateSchemaType]:
         self.repo = repo
 
     async def create(self, data: CreateSchemaType, session: AsyncSession) -> ModelType:
-        new_client = await self.repo.create(session=session, obj_in=data)
+        new_object = await self.repo.create(session=session, obj_in=data)
         await session.commit()
-        return new_client
+        return new_object
 
     async def get_all(self, session: AsyncSession) -> Sequence[ModelType] | None:
         return await self.repo.get_multi(session=session)
@@ -25,14 +25,14 @@ class BaseService[ModelType, CreateSchemaType, UpdateSchemaType]:
         if db_obj is None:
             return None
 
-        updated_client = await self.repo.update(session=session, db_obj=db_obj, obj_in=data)
+        updated_object = await self.repo.update(session=session, db_obj=db_obj, obj_in=data)
 
         await session.commit()
-        return updated_client
+        return updated_object
 
     async def delete(self, id, session: AsyncSession) -> ModelType | None:
 
-        deleted_client = await self.repo.remove(id=id, session=session)
+        deleted_object = await self.repo.remove(id=id, session=session)
         await session.commit()
 
-        return deleted_client
+        return deleted_object
