@@ -11,7 +11,7 @@ class HistoryService:
         self.repo = history_repository
 
     async def get_by_id(self, event_id: int, session: AsyncSession) -> History | None:
-        return await self.repo.get(id=id, session=session)
+        return await self.repo.get(id=event_id, session=session)
 
     async def get_all(self, session: AsyncSession) -> Sequence[History] | None:
         return await self.repo.get_multi(session=session)
