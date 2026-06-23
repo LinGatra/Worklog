@@ -1,8 +1,10 @@
 from typing import Any
 
 from sqlalchemy import func, insert, literal, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.exception_handling.domain_exceptions import ForeignKeyViolation
 from app.models.alt_price import AltPrice
 from app.models.history import History
 from app.models.offering import Offering
@@ -46,10 +48,18 @@ class HistoryRepository:
             .returning(History)
         )
 
-        result = await session.execute(insert_stmt)
-        await session.flush()
+        try:
+            result = await session.execute(insert_stmt)
+        except IntegrityError as e:
+            sqlstate = getattr(e.orig, 'sqlstate', None)
+            match sqlstate:
+                case '23503':
+                    raise ForeignKeyViolation from e
+            raise
 
-        return result.scalar_one()
+        else:
+            await session.flush()
+            return result.scalar_one()
 
 
 history_repository = HistoryRepository()

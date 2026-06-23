@@ -3,7 +3,10 @@ from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.exception_handling.domain_exceptions import ForeignKeyViolation, UniqueConstraintViolation
 
 
 class BaseRepository[ModelType, CreateSchemaType: BaseModel, UpdateSchemaType: BaseModel]:
@@ -29,8 +32,19 @@ class BaseRepository[ModelType, CreateSchemaType: BaseModel, UpdateSchemaType: B
 
         session.add(db_obj)
 
-        await session.flush()
-        return db_obj
+        try:
+            await session.flush()
+        except IntegrityError as e:
+            sqlstate = getattr(e.orig, 'sqlstate', None)
+            match sqlstate:
+                case '23505':
+                    raise UniqueConstraintViolation from e
+                case '23503':
+                    raise ForeignKeyViolation from e
+                case _:
+                    raise
+        else:
+            return db_obj
 
     async def update(
         self, session: AsyncSession, db_obj: ModelType, obj_in: UpdateSchemaType | dict[str, Any]
@@ -45,8 +59,18 @@ class BaseRepository[ModelType, CreateSchemaType: BaseModel, UpdateSchemaType: B
                 setattr(db_obj, field, update_data[field])
 
         session.add(db_obj)
-        await session.flush()
-        return db_obj
+
+        try:
+            await session.flush()
+        except IntegrityError as e:
+            sqlstate = getattr(e.orig, 'sqlstate', None)
+            match sqlstate:
+                case '23503':
+                    raise ForeignKeyViolation from e
+                case _:
+                    raise
+        else:
+            return db_obj
 
     async def remove(self, session: AsyncSession, id: Any) -> ModelType | None:
         db_obj = await session.get(self.model, id)

@@ -3,6 +3,12 @@ from collections.abc import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base_repository import BaseRepository
+from app.exception_handling.domain_exceptions import ForeignKeyViolation, UniqueConstraintViolation
+from app.exception_handling.http_exception_handling import (
+    BadRequestException,
+    ConflictException,
+    NotFoundException,
+)
 
 
 class BaseService[ModelType, CreateSchemaType, UpdateSchemaType]:
@@ -10,29 +16,56 @@ class BaseService[ModelType, CreateSchemaType, UpdateSchemaType]:
         self.repo = repo
 
     async def create(self, data: CreateSchemaType, session: AsyncSession) -> ModelType:
-        async with session.begin():
-            new_object = await self.repo.create(session=session, obj_in=data)
+        try:
+            async with session.begin():
+                new_object = await self.repo.create(session=session, obj_in=data)
 
-        return new_object
+        except ForeignKeyViolation as e:
+            raise BadRequestException from e
+        except UniqueConstraintViolation as e:
+            raise ConflictException from e
+
+        else:
+            return new_object
 
     async def get_all(self, session: AsyncSession) -> Sequence[ModelType] | None:
-        return await self.repo.get_multi(session=session)
+        result = await self.repo.get_multi(session=session)
+
+        if result is None:
+            raise NotFoundException
+        else:
+            return result
 
     async def get_by_id(self, id, session: AsyncSession) -> ModelType | None:
-        return await self.repo.get(id=id, session=session)
+        result = await self.repo.get(id=id, session=session)
+
+        if result is None:
+            raise NotFoundException
+        else:
+            return result
 
     async def update(self, id, data: UpdateSchemaType, session: AsyncSession) -> ModelType | None:
         db_obj = await self.get_by_id(id=id, session=session)
-        if db_obj is None:
-            return None
 
-        async with session.begin():
-            updated_object = await self.repo.update(session=session, db_obj=db_obj, obj_in=data)
+        try:
+            async with session.begin():
+                updated_object = await self.repo.update(session=session, db_obj=db_obj, obj_in=data)
 
-        return updated_object
+        except ForeignKeyViolation as e:
+            raise BadRequestException from e
+
+        else:
+            return updated_object
 
     async def delete(self, id, session: AsyncSession) -> ModelType | None:
-        async with session.begin():
-            deleted_object = await self.repo.remove(id=id, session=session)
+        try:
+            async with session.begin():
+                deleted_object = await self.repo.remove(id=id, session=session)
 
-        return deleted_object
+        except ForeignKeyViolation as e:
+            raise BadRequestException from e
+
+        if deleted_object is None:
+            raise NotFoundException
+        else:
+            return deleted_object
