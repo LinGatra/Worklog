@@ -1,4 +1,3 @@
-version: '5.1'
 services:
   db:
     container_name: postgres_db
@@ -31,11 +30,11 @@ services:
       db:
         condition: service_healthy
 
-  app:
-    container_name: accounting_service
+  worklog:
+    container_name: worklog
     build: .
     env_file: .env
-    command: uvicorn app.main:app --host ${APP_HOST} --port ${APP_PORT}
+    command: uvicorn app.main:app --host ${APP_HOST} --port ${APP_PORT} --reload
     ports:
       - "${APP_PORT}:${APP_PORT}"
     networks:
@@ -50,6 +49,15 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+    develop:
+      watch:
+        - action: sync
+          path: ./app
+          target: /app/app
+        - action: rebuild
+          path: pyproject.toml
+        - action: rebuild
+          path: poetry.lock
 
 volumes:
   pgdata:
