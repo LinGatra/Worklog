@@ -6,9 +6,7 @@ from app.config import config
 
 
 async def init_db(app):
-    engine: AsyncEngine = create_async_engine(
-        config.SQLALCHEMY_DATABASE_URL, echo=config.ENVIRONMENT == 'dev'
-    )
+    engine: AsyncEngine = create_async_engine(config.SQLALCHEMY_DATABASE_URL, echo=False)
     app.state.engine = engine
     app.state.session_factory = async_sessionmaker(engine, expire_on_commit=False)
 
