@@ -3,7 +3,11 @@ from collections.abc import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base_repository import BaseRepository
-from app.exception_handling.domain_exceptions import ForeignKeyViolation, UniqueConstraintViolation
+from app.exception_handling.domain_exceptions import (
+    ForeignKeyViolation,
+    NotFound,
+    UniqueConstraintViolation,
+)
 from app.exception_handling.http_exception_handling import (
     BadRequestException,
     ConflictException,
@@ -29,18 +33,18 @@ class BaseService[ModelType, CreateSchemaType, UpdateSchemaType]:
             return new_object
 
     async def get_all(self, session: AsyncSession) -> Sequence[ModelType] | None:
-        result = await self.repo.get_multi(session=session)
-
-        if result is None:
-            raise NotFoundException
+        try:
+            result = await self.repo.get_multi(session=session)
+        except NotFound as e:
+            raise NotFoundException from e
         else:
             return result
 
     async def get_by_id(self, id, session: AsyncSession) -> ModelType | None:
-        result = await self.repo.get(id=id, session=session)
-
-        if result is None:
-            raise NotFoundException
+        try:
+            result = await self.repo.get(id=id, session=session)
+        except NotFound as e:
+            raise NotFoundException from e
         else:
             return result
 
@@ -64,8 +68,8 @@ class BaseService[ModelType, CreateSchemaType, UpdateSchemaType]:
 
         except ForeignKeyViolation as e:
             raise BadRequestException from e
+        except NotFound as e:
+            raise NotFoundException from e
 
-        if deleted_object is None:
-            raise NotFoundException
         else:
             return deleted_object

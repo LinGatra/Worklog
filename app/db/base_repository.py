@@ -6,7 +6,11 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.exception_handling.domain_exceptions import ForeignKeyViolation, UniqueConstraintViolation
+from app.exception_handling.domain_exceptions import (
+    ForeignKeyViolation,
+    NotFound,
+    UniqueConstraintViolation,
+)
 
 
 class BaseRepository[ModelType, CreateSchemaType: BaseModel, UpdateSchemaType: BaseModel]:
@@ -14,13 +18,15 @@ class BaseRepository[ModelType, CreateSchemaType: BaseModel, UpdateSchemaType: B
         self.model = model
 
     async def get(self, session: AsyncSession, id: Any) -> ModelType | None:
-        return await session.get(self.model, id)
+        result = await session.get(self.model, id)
+        if result is None:
+            raise NotFound
+        else:
+            return result
 
+    # Пагинация через `limit / offset`. Возможно, стоит пересмотреть в будущем, и вместо offset использовать id
     async def get_multi(
-        self,
-        session: AsyncSession,
-        skip: int = 0,
-        limit: int = 100,  # Пагинация через `limit / offset`. Возможно, стоит пересмотреть в будущем, и вместо offset использовать id
+        self, session: AsyncSession, skip: int = 0, limit: int = 100
     ) -> Sequence[ModelType]:
         statement = select(self.model).offset(skip).limit(limit)
         result = await session.execute(statement)
@@ -77,4 +83,6 @@ class BaseRepository[ModelType, CreateSchemaType: BaseModel, UpdateSchemaType: B
         if db_obj:
             await session.delete(db_obj)
             await session.flush()
-        return db_obj
+            return db_obj
+        else:
+            raise NotFound

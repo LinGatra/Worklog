@@ -4,7 +4,7 @@ from sqlalchemy import func, insert, literal, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.exception_handling.domain_exceptions import ForeignKeyViolation
+from app.exception_handling.domain_exceptions import ForeignKeyViolation, NotFound
 from app.models.alt_price import AltPrice
 from app.models.history import History
 from app.models.offering import Offering
@@ -16,7 +16,11 @@ class HistoryRepository:
         self.model = History
 
     async def get(self, session: AsyncSession, id: Any) -> History | None:
-        return await session.get(History, id)
+        result = await session.get(History, id)
+        if result is None:
+            raise NotFound
+        else:
+            return result
 
     # Пагинация через `limit / offset`. Возможно, стоит пересмотреть в будущем, и вместо offset использовать id
     async def get_multi(self, session: AsyncSession, skip: int = 0, limit: int = 100):

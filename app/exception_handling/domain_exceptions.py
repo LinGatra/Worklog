@@ -4,3 +4,7 @@ class ForeignKeyViolation(Exception):
 
 class UniqueConstraintViolation(Exception):
     pass
+
+
+class NotFound(Exception):
+    pass
