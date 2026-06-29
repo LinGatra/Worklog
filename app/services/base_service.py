@@ -2,6 +2,7 @@ from collections.abc import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.app_logging.business_log import log_business_event
 from app.db.base_repository import BaseRepository
 from app.exception_handling.domain_exceptions import (
     ForeignKeyViolation,
@@ -19,6 +20,7 @@ class BaseService[ModelType, CreateSchemaType, UpdateSchemaType]:
     def __init__(self, repo: BaseRepository):
         self.repo = repo
 
+    @log_business_event(action='create')
     async def create(self, data: CreateSchemaType, session: AsyncSession) -> ModelType:
         try:
             async with session.begin():
@@ -32,6 +34,7 @@ class BaseService[ModelType, CreateSchemaType, UpdateSchemaType]:
         else:
             return new_object
 
+    @log_business_event(action='get_all')
     async def get_all(self, session: AsyncSession) -> Sequence[ModelType] | None:
         try:
             result = await self.repo.get_multi(session=session)
@@ -40,6 +43,7 @@ class BaseService[ModelType, CreateSchemaType, UpdateSchemaType]:
         else:
             return result
 
+    @log_business_event(action='get_by_id')
     async def get_by_id(self, id, session: AsyncSession) -> ModelType | None:
         try:
             result = await self.repo.get(id=id, session=session)
@@ -48,6 +52,7 @@ class BaseService[ModelType, CreateSchemaType, UpdateSchemaType]:
         else:
             return result
 
+    @log_business_event(action='update')
     async def update(self, id, data: UpdateSchemaType, session: AsyncSession) -> ModelType | None:
         db_obj = await self.get_by_id(id=id, session=session)
 
@@ -61,6 +66,7 @@ class BaseService[ModelType, CreateSchemaType, UpdateSchemaType]:
         else:
             return updated_object
 
+    @log_business_event(action='delete')
     async def delete(self, id, session: AsyncSession) -> ModelType | None:
         try:
             async with session.begin():
