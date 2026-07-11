@@ -35,7 +35,12 @@ class HistoryService:
     @log_business_event(action='create')
     async def create(self, data: HistoryCreate, session: AsyncSession) -> History:
         async with session.begin():
-            return await self.repo.create(session=session, data=data)
+            try:
+                result = await self.repo.create(session=session, data=data)
+            except NotFound as e:
+                raise NotFoundException from e
+            else:
+                return result
 
 
 history_service = HistoryService()

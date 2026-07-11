@@ -1,7 +1,7 @@
 from typing import Any
 
 from sqlalchemy import func, insert, literal, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.exception_handling.domain_exceptions import ForeignKeyViolation, NotFound
@@ -54,6 +54,7 @@ class HistoryRepository:
 
         try:
             result = await session.execute(insert_stmt)
+            row = result.scalar_one()
         except IntegrityError as e:
             sqlstate = getattr(e.orig, 'sqlstate', None)
             match sqlstate:
@@ -61,9 +62,12 @@ class HistoryRepository:
                     raise ForeignKeyViolation from e
             raise
 
+        except NoResultFound as e:
+            raise NotFound from e
+
         else:
             await session.flush()
-            return result.scalar_one()
+            return row
 
 
 history_repository = HistoryRepository()
