@@ -8,3 +8,7 @@ class UniqueConstraintViolation(Exception):
 
 class NotFound(Exception):
     pass
+
+
+class NotNullViolation(Exception):
+    pass

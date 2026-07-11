@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.exception_handling.domain_exceptions import (
     ForeignKeyViolation,
     NotFound,
+    NotNullViolation,
     UniqueConstraintViolation,
 )
 
@@ -75,6 +76,8 @@ class BaseRepository[ModelType, CreateSchemaType: BaseModel, UpdateSchemaType: B
         except IntegrityError as e:
             sqlstate = getattr(e.orig, 'sqlstate', None)
             match sqlstate:
+                case '23502':
+                    raise NotNullViolation from e
                 case '23503':
                     raise ForeignKeyViolation from e
                 case '23505':
