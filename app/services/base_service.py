@@ -63,6 +63,9 @@ class BaseService[ModelType, CreateSchemaType, UpdateSchemaType]:
         except ForeignKeyViolation as e:
             raise BadRequestException from e
 
+        except UniqueConstraintViolation as e:
+            raise ConflictException from e
+
         else:
             return updated_object
 

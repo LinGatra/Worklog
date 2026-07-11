@@ -30,7 +30,11 @@ class BaseRepository[ModelType, CreateSchemaType: BaseModel, UpdateSchemaType: B
     ) -> Sequence[ModelType]:
         statement = select(self.model).offset(skip).limit(limit)
         result = await session.execute(statement)
-        return result.scalars().all()
+
+        if result:
+            return result.scalars().all()
+        else:
+            raise NotFound
 
     async def create(self, session: AsyncSession, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = obj_in.model_dump()
@@ -73,6 +77,8 @@ class BaseRepository[ModelType, CreateSchemaType: BaseModel, UpdateSchemaType: B
             match sqlstate:
                 case '23503':
                     raise ForeignKeyViolation from e
+                case '23505':
+                    raise UniqueConstraintViolation from e
                 case _:
                     raise
         else:
@@ -82,7 +88,16 @@ class BaseRepository[ModelType, CreateSchemaType: BaseModel, UpdateSchemaType: B
         db_obj = await session.get(self.model, id)
         if db_obj:
             await session.delete(db_obj)
-            await session.flush()
-            return db_obj
+            try:
+                await session.flush()
+            except IntegrityError as e:
+                sqlstate = getattr(e.orig, 'sqlstate', None)
+                match sqlstate:
+                    case '23503':
+                        raise ForeignKeyViolation from e
+                    case _:
+                        raise
+            else:
+                return db_obj
         else:
             raise NotFound

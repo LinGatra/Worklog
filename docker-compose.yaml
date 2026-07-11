@@ -1,66 +1,161 @@
 services:
-  db:
-    container_name: postgres_db
+  # --- prod ---
+  db-prod:
+    container_name: postgres_db_prod
     image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+    env_file: .env.prod
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata_prod:/var/lib/postgresql/data
     networks:
       - app_network
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d app_db" ]
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
       interval: 5s
       timeout: 5s
       retries: 5
       start_period: 5s
+    profiles: [ 'prod' ]
 
-  alembic:
-    container_name: alembic
-    build: .
+  alembic-prod:
+    container_name: alembic_prod
+    build:
+      context: .
+      target: prod
     networks:
       - app_network
     restart: "no"
     command: alembic upgrade head
-    env_file: .env
+    env_file: .env.prod
     depends_on:
-      db:
+      db-prod:
         condition: service_healthy
+    profiles: [ 'prod' ]
 
-  worklog:
-    container_name: worklog
-    build: .
-    env_file: .env
+  worklog-prod:
+    build:
+      context: .
+      target: prod
+    env_file: .env.prod
+    command: uvicorn app.main:app --host ${APP_HOST} --port ${APP_PORT}
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    networks:
+      - app_network
+    depends_on:
+      alembic-prod:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:${APP_PORT}/health')" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    profiles: [ 'prod' ]
+
+  # --- общая БД для dev и test ---
+  db-test:
+    container_name: postgres_db_test
+    image: postgres:16-alpine
+    env_file: .env.test
+    volumes:
+      - pgdata_test:/var/lib/postgresql/data
+    networks:
+      - app_network
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    profiles: [ 'dev', 'test' ]
+
+  # --- test ---
+  alembic-test:
+    container_name: alembic_test
+    build:
+      context: .
+      target: test
+    networks:
+      - app_network
+    restart: "no"
+    command: alembic upgrade head
+    env_file: .env.test
+    depends_on:
+      db-test:
+        condition: service_healthy
+    profiles: [ 'test' ]
+
+  worklog-test:
+    build:
+      context: .
+      target: test
+    env_file: .env.test
+    command: pytest /worklog/tests
+    networks:
+      - app_network
+    depends_on:
+      alembic-test:
+        condition: service_completed_successfully
+    restart: "no"
+    profiles: [ 'test' ]
+
+  # --- dev ---
+  alembic-dev:
+    container_name: alembic_dev
+    build:
+      context: .
+      target: dev
+    networks:
+      - app_network
+    restart: "no"
+    command: alembic upgrade head
+    env_file:
+      - .env.test
+      - .env
+    depends_on:
+      db-test:
+        condition: service_healthy
+    profiles: [ 'dev' ]
+
+  worklog-dev:
+    build:
+      context: .
+      target: dev
+    env_file:
+      - .env.test
+      - .env
     command: uvicorn app.main:app --host ${APP_HOST} --port ${APP_PORT} --reload
     ports:
       - "${APP_PORT}:${APP_PORT}"
     networks:
       - app_network
     depends_on:
-      alembic:
+      alembic-dev:
         condition: service_completed_successfully
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:${APP_PORT}/health || exit 1" ]
-      interval: 10s
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:${APP_PORT}/health')" ]
+      interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
     develop:
       watch:
         - action: sync
-          path: ./app
-          target: /app/app
+          path: ./worklog
+          target: /worklog/app
         - action: rebuild
           path: pyproject.toml
         - action: rebuild
           path: poetry.lock
+    profiles: [ 'dev' ]
 
 volumes:
-  pgdata:
+  pgdata_test:
+  pgdata_prod:
 
 networks:
   app_network:
