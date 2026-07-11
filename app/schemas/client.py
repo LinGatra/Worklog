@@ -5,6 +5,7 @@ from app.schemas.schemas_config import Config
 
 class ClientBase(Config):
     client_name: str = Field(
+        min_length=1,
         max_length=100,
         description='Only latin, cyrillic, numeric and puntuation symbols.',
     )
