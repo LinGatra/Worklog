@@ -2,6 +2,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 
 from app.exception_handling.domain_exceptions import (
+    CheckConstraintViolation,
     ForeignKeyViolation,
     NotFound,
     NotNullViolation,
@@ -27,4 +28,13 @@ async def not_null_handler(request: Request, exc: NotNullViolation):
     return JSONResponse(
         status_code=400,
         content={'error': {'code': 400, 'message': 'One of the key fields is passed as null'}},
+    )
+
+
+async def check_constraint_violation_handler(request: Request, exc: CheckConstraintViolation):
+    return JSONResponse(
+        status_code=400,
+        content={
+            'error': {'code': 400, 'message': 'one of the restrictions was unexpectedly violated'}
+        },
     )

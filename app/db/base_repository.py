@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.exception_handling.domain_exceptions import (
+    CheckConstraintViolation,
     ForeignKeyViolation,
     NotFound,
     NotNullViolation,
@@ -48,6 +49,10 @@ class BaseRepository[ModelType, CreateSchemaType: BaseModel, UpdateSchemaType: B
         except IntegrityError as e:
             sqlstate = getattr(e.orig, 'sqlstate', None)
             match sqlstate:
+                case '23514':
+                    raise CheckConstraintViolation from e
+                case '23502':
+                    raise NotNullViolation from e
                 case '23505':
                     raise UniqueConstraintViolation from e
                 case '23503':
@@ -76,6 +81,8 @@ class BaseRepository[ModelType, CreateSchemaType: BaseModel, UpdateSchemaType: B
         except IntegrityError as e:
             sqlstate = getattr(e.orig, 'sqlstate', None)
             match sqlstate:
+                case '23514':
+                    raise CheckConstraintViolation from e
                 case '23502':
                     raise NotNullViolation from e
                 case '23503':
@@ -96,6 +103,8 @@ class BaseRepository[ModelType, CreateSchemaType: BaseModel, UpdateSchemaType: B
             except IntegrityError as e:
                 sqlstate = getattr(e.orig, 'sqlstate', None)
                 match sqlstate:
+                    case '23514':
+                        raise CheckConstraintViolation from e
                     case '23503':
                         raise ForeignKeyViolation from e
                     case _:

@@ -4,7 +4,11 @@ from sqlalchemy import func, insert, literal, select
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.exception_handling.domain_exceptions import ForeignKeyViolation, NotFound
+from app.exception_handling.domain_exceptions import (
+    CheckConstraintViolation,
+    ForeignKeyViolation,
+    NotFound,
+)
 from app.models.alt_price import AltPrice
 from app.models.history import History
 from app.models.offering import Offering
@@ -58,6 +62,8 @@ class HistoryRepository:
         except IntegrityError as e:
             sqlstate = getattr(e.orig, 'sqlstate', None)
             match sqlstate:
+                case '23514':
+                    raise CheckConstraintViolation from e
                 case '23503':
                     raise ForeignKeyViolation from e
             raise

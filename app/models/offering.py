@@ -13,4 +13,5 @@ class Offering(Base):
 
     __table_args__ = (
         CheckConstraint('offering_price >= 0', name='ck_offering_price_non_negative'),
+        CheckConstraint('lenght(offering_name) >= 1', name='name_not_null'),
     )

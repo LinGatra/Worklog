@@ -12,3 +12,7 @@ class NotFound(Exception):
 
 class NotNullViolation(Exception):
     pass
+
+
+class CheckConstraintViolation(Exception):
+    pass
