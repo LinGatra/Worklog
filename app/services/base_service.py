@@ -29,7 +29,7 @@ class BaseService[ModelType, CreateSchemaType, UpdateSchemaType]:
     @log_business_event(action='update')
     async def update(self, id, data: UpdateSchemaType, session: AsyncSession) -> ModelType | None:
         async with session.begin():
-            db_obj = await self.get_by_id(id=id, session=session)
+            db_obj = await self.repo.get(id=id, session=session)
             updated_object = await self.repo.update(session=session, db_obj=db_obj, obj_in=data)
 
             return updated_object
