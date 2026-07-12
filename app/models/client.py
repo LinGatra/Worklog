@@ -10,4 +10,4 @@ class Client(Base):
     client_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     client_name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
 
-    __table_args__ = CheckConstraint('lenght(client_name) => 1', name='name_not_null')
+    __table_args__ = (CheckConstraint('length(client_name) >= 1', name='name_not_null'),)
