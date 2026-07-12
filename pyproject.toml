@@ -28,7 +28,34 @@ dev = [
     "ruff (>=0.15.12,<0.16.0)",
     "pre-commit (>=4.6.0,<5.0.0)",
 ]
+test = [
+    "pytest (>=9.1.1,<10.0.0)",
+    "pytest-timeout (>=2.4.0,<3.0.0)",
+    "testcontainers (>=4.14.2,<5.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "pytest-asyncio (>=1.4.0,<2.0.0)",
+    "pytest-env (>=1.6.0,<2.0.0)",
+]
 
+[tool.pytest.ini_options]
+markers = [
+    "unit: чистые юнит-тесты, без БД",
+    "integration: требуют testcontainers",
+]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+env = [
+    "ENVIRONMENT=test",
+    "SECRET_KEY=test-secret",
+    "ACCESS_TOKEN_EXPIRE_MINUTES=60",
+    "APP_HOST=0.0.0.0",
+    "APP_PORT=8000",
+    "POSTGRES_USER=test",
+    "POSTGRES_PASSWORD=test",
+    "POSTGRES_HOST=127.0.0.1",
+    "POSTGRES_PORT=5433",
+    "POSTGRES_DB=test",
+]
 
 [tool.ruff]
 line-length = 100
