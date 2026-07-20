@@ -8,3 +8,4 @@ tests/
 nginx/
 .pre-commit-config.yaml
 .gitignore
+.vscode
