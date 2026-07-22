@@ -44,18 +44,6 @@ markers = [
 ]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
-env = [
-    "ENVIRONMENT=test",
-    "SECRET_KEY=test-secret",
-    "ACCESS_TOKEN_EXPIRE_MINUTES=60",
-    "APP_HOST=0.0.0.0",
-    "APP_PORT=8000",
-    "POSTGRES_USER=test",
-    "POSTGRES_PASSWORD=test",
-    "POSTGRES_HOST=127.0.0.1",
-    "POSTGRES_PORT=5433",
-    "POSTGRES_DB=test",
-]
 
 [tool.ruff]
 line-length = 100

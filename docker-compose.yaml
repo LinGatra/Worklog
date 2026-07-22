@@ -83,7 +83,6 @@ services:
     command: alembic upgrade head
     env_file:
       - .env.dev
-      - .env
     depends_on:
       db-dev:
         condition: service_healthy
@@ -95,7 +94,6 @@ services:
       target: dev
     env_file:
       - .env.dev
-      - .env
     command: uvicorn app.main:app --host ${APP_HOST} --port ${APP_PORT} --reload
     ports:
       - "${APP_PORT}:${APP_PORT}"
@@ -107,7 +105,7 @@ services:
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:${APP_PORT}/health')" ]
-      interval: 30s
+      interval: 120s
       timeout: 5s
       retries: 3
       start_period: 10s

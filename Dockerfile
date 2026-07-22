@@ -2,7 +2,7 @@ FROM python:3.14-slim AS builder
 WORKDIR /worklog
 COPY pyproject.toml poetry.lock ./
 RUN pip install --no-cache-dir poetry poetry-plugin-export
-RUN poetry export -f requirements.txt --output requirements.txt
+RUN poetry config virtualenvs.create false && poetry export -f requirements.txt --output requirements.txt
 RUN poetry export -f requirements.txt --with test --output requirements-dev.txt
 
 # только установка базовых зависимостей — без кода
