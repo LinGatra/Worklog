@@ -1,61 +1,77 @@
-from collections.abc import AsyncGenerator
-from os import path
-
 import pytest
-from alembic.config import Config
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
+from testcontainers.core.container import DockerContainer
+from testcontainers.core.image import DockerImage
+from testcontainers.core.network import Network
+from testcontainers.core.wait_strategies import LogMessageWaitStrategy
 from testcontainers.postgres import PostgresContainer
 
-from alembic import command
-from app.models.alt_price import AltPrice  # noqa: F401
-from app.models.client import Client  # noqa: F401
-from app.models.history import History  # noqa: F401
-from app.models.models_config import Base
-from app.models.offering import Offering  # noqa: F401
+
+@pytest.fixture(scope='session')
+def dev_image():
+    with DockerImage(path='.', tag='dev') as image:
+        yield image
 
 
 @pytest.fixture(scope='session')
-def postgres_container():
-    with PostgresContainer('postgres:16-alpine') as container:
-        yield container
+def app_environment(dev_image):
+    with Network() as network:
+        postgres = (
+            PostgresContainer('postgres:16')
+            .with_network(network=network)
+            .with_network_aliases('test-db')
+        )
 
+        postgres.start()
 
-def alembic_run_migrations(url: str):
-    project_root = path.abspath(path.join(path.dirname(__file__), '..'))
-    ini_path = path.join(project_root, 'alembic.ini')
+        def apply_env(container: DockerContainer, env: dict) -> DockerContainer:
+            for key, value in env.items():
+                container = container.with_env(key, value)
+            return container
 
-    config = Config(ini_path)
-    config.attributes['sqlalchemy_url'] = url
+        common_env = {
+            'POSTGRES_USER': postgres.username,
+            'POSTGRES_PASSWORD': postgres.password,
+            'POSTGRES_HOST': 'test-db',
+            'POSTGRES_PORT': '5432',
+            'POSTGRES_DB': postgres.dbname,
+            'SECRET_KEY': 'test-secret-key',
+            'ACCESS_TOKEN_EXPIRE_MINUTES': '30',
+            'APP_HOST': '0.0.0.0',
+            'APP_PORT': '8000',
+        }
 
-    command.upgrade(config, 'head')
+        app = apply_env(
+            DockerContainer('dev')
+            .with_network(network=network)
+            .with_network_aliases('test-worklog')
+            .with_exposed_ports(8000)
+            .with_command(
+                f'uvicorn app.main:app --host {common_env["APP_HOST"]} --port {common_env["APP_PORT"]}'
+            )
+            .waiting_for(LogMessageWaitStrategy('Application startup complete')),
+            common_env,
+        )
 
+        alembic = apply_env(
+            DockerContainer('dev')
+            .with_network(network=network)
+            .with_network_aliases('test-alembic')
+            .with_command('alembic upgrade head'),
+            common_env,
+        )
 
-@pytest.fixture(scope='session')
-async def engine(postgres_container) -> AsyncGenerator[AsyncEngine]:
-    alembic_url = postgres_container.get_connection_url().replace(
-        'postgresql+psycopg2', 'postgresql+psycopg'
-    )
+        alembic.start()
+        exit_code = alembic.get_wrapped_container().wait()['StatusCode']
+        if exit_code != 0:
+            raise RuntimeError(alembic.get_logs())
+        alembic.stop()
 
-    # testcontainers по умолчанию отдаёт psycopg2-URL, драйвер нужно подменить на asyncpg
-    engine_url = postgres_container.get_connection_url().replace(
-        'postgresql+psycopg2', 'postgresql+asyncpg'
-    )
-    engine = create_async_engine(engine_url, echo=False)
+        app.start()
+        # wait_for_logs(app, 'Application startup complete')
 
-    alembic_run_migrations(url=alembic_url)
+        yield {
+            'app_url': f'http://{app.get_container_host_ip()}:{app.get_exposed_port(8000)}',
+        }
 
-    yield engine
-    await engine.dispose()
-
-
-@pytest.fixture
-async def session(engine):
-    async_session_factory = async_sessionmaker(engine, expire_on_commit=False)
-    async with async_session_factory() as session:
-        yield session
-
-    # cleanup — truncate всех таблиц после теста, CASCADE из-за FK между Client/Offering/AltPrice/History
-    async with engine.begin() as conn:
-        tables = ', '.join(t.name for t in Base.metadata.sorted_tables)
-        await conn.execute(text(f'TRUNCATE {tables} RESTART IDENTITY CASCADE'))
+        app.stop()
+        postgres.stop()
