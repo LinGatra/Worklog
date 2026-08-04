@@ -30,7 +30,10 @@ class HistoryRepository:
     async def get_multi(self, session: AsyncSession, skip: int = 0, limit: int = 100):
         statement = select(History).offset(skip).limit(limit)
         result = await session.execute(statement)
-        return result.scalars().all()
+        if result:
+            return result.scalars().all()
+        else:
+            raise NotFound
 
     async def create(self, session: AsyncSession, data: HistoryCreate) -> History:
         client_id = data.client_id
