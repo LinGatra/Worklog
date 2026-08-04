@@ -15,11 +15,7 @@ pytestmark = pytest.mark.unit
 
 
 class DummyModel:
-    """Заглушка вместо реальной ORM-модели.
-
-    BaseService трогает модель только через self.repo.model.__name__
-    (внутри log_business_event) — больше ей ничего не нужно.
-    """
+    pass
 
 
 @pytest.fixture
@@ -31,7 +27,7 @@ def fake_repo():
 
 @pytest.fixture
 def service(fake_repo):
-    return BaseService(repo=fake_repo)  # не ClientService, а BaseService напрямую
+    return BaseService(repo=fake_repo)
 
 
 # тесты create
