@@ -9,8 +9,8 @@ from app.schemas.history import HistoryCreate
 
 
 class HistoryService:
-    def __init__(self):
-        self.repo = history_repository
+    def __init__(self, repo):
+        self.repo = repo
 
     @log_business_event(action='get_by_id')
     async def get_by_id(self, event_id: int, session: AsyncSession) -> History | None:
@@ -25,8 +25,8 @@ class HistoryService:
     @log_business_event(action='create')
     async def create(self, data: HistoryCreate, session: AsyncSession) -> History:
         async with session.begin():
-            result = await self.repo.create(session=session, data=data)
+            result = await self.repo.create(session=session, obj_in=data)
             return result
 
 
-history_service = HistoryService()
+history_service = HistoryService(repo=history_repository)
