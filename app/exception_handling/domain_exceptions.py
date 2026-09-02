@@ -16,3 +16,7 @@ class NotNullViolation(Exception):
 
 class CheckConstraintViolation(Exception):
     pass
+
+
+class DomainValidationException(Exception):
+    pass

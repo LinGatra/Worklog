@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 
 from app.exception_handling.domain_exceptions import (
     CheckConstraintViolation,
+    DomainValidationException,
     ForeignKeyViolation,
     NotFound,
     NotNullViolation,
@@ -35,6 +36,13 @@ async def check_constraint_violation_handler(request: Request, exc: CheckConstra
     return JSONResponse(
         status_code=400,
         content={
-            'error': {'code': 400, 'message': 'one of the restrictions was unexpectedly violated'}
+            'error': {'code': 400, 'message': 'One of the restrictions was unexpectedly violated'}
         },
+    )
+
+
+async def domain_validation_handler(request: Request, exc: DomainValidationException):
+    return JSONResponse(
+        status_code=400,
+        content={'error': {'code': 400, 'message': 'The entered data has not been validated.'}},
     )

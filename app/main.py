@@ -7,6 +7,7 @@ from app.app_logging.logging_config import setup_logging
 from app.db.engine import close_db, init_db
 from app.exception_handling.domain_exceptions import (
     CheckConstraintViolation,
+    DomainValidationException,
     ForeignKeyViolation,
     NotFound,
     NotNullViolation,
@@ -15,6 +16,7 @@ from app.exception_handling.domain_exceptions import (
 from app.exception_handling.http_exception_handling import (
     bad_request_handler,
     check_constraint_violation_handler,
+    domain_validation_handler,
     not_found_handler,
     not_null_handler,
     unique_violation_handler,
@@ -54,6 +56,7 @@ app.add_exception_handler(ForeignKeyViolation, bad_request_handler)  # type: ign
 app.add_exception_handler(UniqueConstraintViolation, unique_violation_handler)  # type: ignore[arg-type]
 app.add_exception_handler(NotNullViolation, not_null_handler)  # type: ignore[arg-type]
 app.add_exception_handler(CheckConstraintViolation, check_constraint_violation_handler)  # type: ignore[arg-type]
+app.add_exception_handler(DomainValidationException, domain_validation_handler)  # type: ignore[arg-type]
 
 
 @app.get('/')
