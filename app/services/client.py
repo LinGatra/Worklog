@@ -1,4 +1,4 @@
-from app.db.base_repository import BaseRepository
+from app.db.repositories.base_repository import BaseRepository
 from app.models.client import Client
 from app.schemas.client import ClientCreate, ClientUpdate
 from app.services.base_service import BaseService

@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.app_logging.business_log import log_business_event
-from app.db.history_repository import history_repository
+from app.db.repositories.history_repository import history_repository
 from app.models.history import History
 from app.schemas.history import HistoryCreate
 

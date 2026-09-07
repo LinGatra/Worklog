@@ -1,4 +1,4 @@
-from app.db.base_repository import BaseRepository
+from app.db.repositories.base_repository import BaseRepository
 from app.models.alt_price import AltPrice
 from app.schemas.alt_price import AltPriceCreate, AltPriceUpdate
 from app.services.base_service import BaseService

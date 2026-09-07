@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.app_logging.business_log import log_business_event
-from app.db.base_repository import BaseRepository
+from app.db.repositories.base_repository import BaseRepository
 
 
 class BaseService[ModelType, CreateSchemaType, UpdateSchemaType]:
