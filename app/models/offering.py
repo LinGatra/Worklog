@@ -1,4 +1,4 @@
-from sqlalchemy import CheckConstraint, Integer, String
+from sqlalchemy import Boolean, CheckConstraint, Integer, String, false as sa_false
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.models_config import Base
@@ -9,9 +9,11 @@ class Offering(Base):
 
     offering_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     offering_name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    name_alias: Mapped[str] = mapped_column(String, nullable=False)
     offering_price: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=sa_false())
 
     __table_args__ = (
-        CheckConstraint('offering_price >= 0', name='ck_offering_price_non_negative'),
-        CheckConstraint('length(offering_name) >= 1', name='name_not_null'),
+        CheckConstraint('offering_price >= 0', name='price_can_not_be_negative'),
+        CheckConstraint('length(offering_name) >= 1', name='name_can_not_be_empty'),
     )
