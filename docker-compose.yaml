@@ -71,7 +71,8 @@ services:
       retries: 5
       start_period: 5s
     profiles: [ 'dev' ]
-    # --- dev ---
+
+  # --- dev ---
   alembic-dev:
     container_name: alembic_dev
     build:
@@ -79,10 +80,11 @@ services:
       target: dev
     networks:
       - app_network
+    volumes:
+      - ./alembic/versions:/worklog/alembic/versions
     restart: "no"
     command: alembic upgrade head
-    env_file:
-      - .env.dev
+    env_file: .env.dev
     depends_on:
       db-dev:
         condition: service_healthy
@@ -92,8 +94,7 @@ services:
     build:
       context: .
       target: dev
-    env_file:
-      - .env.dev
+    env_file: .env.dev
     command: uvicorn app.main:app --host ${APP_HOST} --port ${APP_PORT} --reload
     ports:
       - "${APP_PORT}:${APP_PORT}"
