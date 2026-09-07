@@ -56,7 +56,7 @@ SERVICE_NAME_POLICY = FieldPolicy(
 
 _POLICIES = {
     'client_name': CLIENT_NAME_POLICY,
-    'service_name': SERVICE_NAME_POLICY,
+    'offering_name': SERVICE_NAME_POLICY,
 }
 
 _COMPILED = {
@@ -177,3 +177,9 @@ def validate(normalized_str: str, field_name: str) -> bool:
         raise ValueError from e
 
     return True
+
+
+if __name__ == '__main__':
+    print(sorted(_COMPILED.items()))
+    print('=' * 50)
+    print(allowed_alias_symbols)
