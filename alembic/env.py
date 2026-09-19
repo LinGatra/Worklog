@@ -7,6 +7,7 @@ from app.config import config as app_config
 from app.models.alt_price import AltPrice  # noqa: F401
 from app.models.client import Client  # noqa: F401
 from app.models.history import History  # noqa: F401
+from app.models.history_details import HistoryDetails  # noqa: F401
 from app.models.models_config import Base
 from app.models.offering import Offering  # noqa: F401
 
