@@ -15,6 +15,10 @@ class ClientCreate(ClientBase):
     pass
 
 
+class ClientCreateDB(ClientCreate):
+    name_alias: str
+
+
 class ClientRead(ClientCreate):
     id: int
 

@@ -16,6 +16,10 @@ class OfferingCreate(OfferingBase):
     pass
 
 
+class OfferingCreateDB(OfferingCreate):
+    name_alias: str
+
+
 class OfferingRead(OfferingCreate):
     id: int
 
