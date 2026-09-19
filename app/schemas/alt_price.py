@@ -13,7 +13,7 @@ class AltPriceCreate(AltPriceBase):
 
 
 class AltPriceRead(AltPriceCreate):
-    alt_price_id: int
+    id: int
 
 
 class AltPriceUpdate(AltPriceBase):

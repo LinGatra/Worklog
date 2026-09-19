@@ -7,7 +7,7 @@ from app.models.models_config import Base
 class Client(Base):
     __tablename__ = 'client'
 
-    client_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column('client_id', Integer, primary_key=True)
     client_name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     name_alias: Mapped[str] = mapped_column(String, nullable=False)
     is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=sa_false())

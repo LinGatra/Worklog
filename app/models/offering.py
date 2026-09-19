@@ -7,7 +7,7 @@ from app.models.models_config import Base
 class Offering(Base):
     __tablename__ = 'offering'
 
-    offering_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column('offering_id', Integer, primary_key=True)
     offering_name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     name_alias: Mapped[str] = mapped_column(String, nullable=False)
     offering_price: Mapped[int] = mapped_column(Integer, nullable=False)

@@ -9,6 +9,6 @@ class HistoryCreate(Config):
 
 
 class HistoryRead(HistoryCreate):
-    event_id: int
+    id: int
     price: int
     created_at: datetime

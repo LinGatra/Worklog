@@ -10,7 +10,7 @@ from app.models.models_config import Base
 class History(Base):
     __tablename__ = 'history'
 
-    event_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    client_id: Mapped[int] = mapped_column(ForeignKey(Client.client_id), nullable=False)
+    id: Mapped[int] = mapped_column('event_id', Integer, primary_key=True)
+    client_id: Mapped[int] = mapped_column(ForeignKey(Client.id), nullable=False)
     final_price: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())

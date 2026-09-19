@@ -16,7 +16,7 @@ class ClientCreate(ClientBase):
 
 
 class ClientRead(ClientCreate):
-    client_id: int
+    id: int
 
 
 class ClientUpdate(ClientBase):

@@ -9,9 +9,9 @@ from app.models.offering import Offering
 class AltPrice(Base):
     __tablename__ = 'alt_price'
 
-    alt_price_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    client_id: Mapped[int] = mapped_column(ForeignKey(Client.client_id), nullable=False)
-    offering_id: Mapped[int] = mapped_column(ForeignKey(Offering.offering_id), nullable=False)
+    id: Mapped[int] = mapped_column('alt_price_id', Integer, primary_key=True)
+    client_id: Mapped[int] = mapped_column(ForeignKey(Client.id), nullable=False)
+    offering_id: Mapped[int] = mapped_column(ForeignKey(Offering.id), nullable=False)
     alt_price: Mapped[int] = mapped_column(Integer, nullable=False)
 
     __table_args__ = (

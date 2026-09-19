@@ -17,7 +17,7 @@ class OfferingCreate(OfferingBase):
 
 
 class OfferingRead(OfferingCreate):
-    offering_id: int
+    id: int
 
 
 class OfferingUpdate(OfferingBase):
