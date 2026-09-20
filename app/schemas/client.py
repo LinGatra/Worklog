@@ -9,7 +9,7 @@ ClientName = Annotated[
     Field(
         min_length=1,
         max_length=100,
-        description='Only latin, cyrillic, numeric and puntuation symbols.',
+        description='Only latin, cyrillic, numeric and punctuation symbols.',
     ),
 ]
 

@@ -9,7 +9,7 @@ OfferingName = Annotated[
     Field(
         min_length=1,
         max_length=100,
-        description='Only latin, cyrillic, numeric and puntuation symbols.',
+        description='Only latin, cyrillic, numeric and punctuation symbols.',
     ),
 ]
 
@@ -46,7 +46,7 @@ class OfferingUpdate(Config):
 
     @field_validator('offering_price')
     @classmethod
-    def offering_price_not_null(cls, value: str | None) -> str:
+    def offering_price_not_null(cls, value: int | None) -> int:
         if value is None:
             raise ValueError('offering_price cannot be null')
         return value
