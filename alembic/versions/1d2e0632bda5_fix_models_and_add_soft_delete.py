@@ -251,7 +251,7 @@ client_new = sa.table(
 )
 
 offering_new = sa.table(
-    'client',
+    'offering',
     sa.column('offering_id', sa.Integer),
     sa.column('offering_name', sa.String),
     sa.column('name_alias', sa.String),
