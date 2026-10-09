@@ -171,6 +171,12 @@ __CYR_TO_LAT = str.maketrans(
     }
 )
 
+__en_lower = 'abcdefghijklmnopqrstuvwxyz'
+
+__digits = set('0123456789')
+
+__allowed_alias_symbols = set(__en_lower) | __digits
+
 
 class DomainValidationException(Exception):
     pass
@@ -195,23 +201,18 @@ def __normalize_for_ui_snapshot(str_in: str, field_name: str) -> str:
     if not (isinstance(str_in, str) and isinstance(field_name, str)):
         raise TypeError
     if not (str_in and field_name):
-        raise TypeError
+        raise ValueError
 
     sanitized_string = __sanitize_snapshot(str_in=str_in)
-    try:
-        allowed = __COMPILED_SNAPSHOT[field_name]
+    allowed = __COMPILED_SNAPSHOT[field_name]
+    data = unicodedata.normalize('NFC', sanitized_string)
 
-        data = ' '.join(sanitized_string.split())
-        data = unicodedata.normalize('NFC', data)
-
-        if not data:
+    if not data:
+        raise DomainValidationException
+    for char in data:
+        if unicodedata.category(char) not in allowed:
             raise DomainValidationException
-        for char in data:
-            if unicodedata.category(char) not in allowed:
-                raise DomainValidationException
-        return data
-    except KeyError as e:
-        raise ValueError from e
+    return data
 
 
 def __make_alias_snapshot(str_in: str, field_name: str) -> str:
@@ -224,7 +225,7 @@ def __make_alias_snapshot(str_in: str, field_name: str) -> str:
     data = data.casefold().translate(__CYR_TO_LAT)
     data = unicodedata.normalize('NFKD', data)
 
-    alias = ''.join(char for char in data if char in __allowed_alias_symbols_snapshot)
+    alias = ''.join(char for char in data if char in __allowed_alias_symbols)
     if not alias:
         raise DomainValidationException
     return alias
