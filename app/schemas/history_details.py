@@ -1,11 +1,12 @@
+from app.schemas.domain_types import LimitedIntID, OfferingPrice
 from app.schemas.schemas_config import Config
 
 
 class HistoryDetailsCreate(Config):
-    event_id: int
-    offering_id: int
-    offering_price: int
+    event_id: LimitedIntID
+    offering_id: LimitedIntID
+    offering_price: OfferingPrice
 
 
-class HistoryDetailsRead(HistoryDetailsCreate):
-    id: int
+class HistoryDetailsRead(Config):
+    id: LimitedIntID

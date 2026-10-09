@@ -1,10 +1,8 @@
-from typing import Annotated
+from pydantic import field_validator
 
-from pydantic import Field, field_validator
-
+from app.exception_handling.domain_exceptions import DomainValidationException
+from app.schemas.domain_types import AltPrice, LimitedIntID
 from app.schemas.schemas_config import Config
-
-AltPrice = Annotated[int, Field(ge=0, description='Price can not be less than zero')]
 
 
 class AltPriceBase(Config):
@@ -12,12 +10,12 @@ class AltPriceBase(Config):
 
 
 class AltPriceCreate(AltPriceBase):
-    client_id: int
-    offering_id: int
+    client_id: LimitedIntID
+    offering_id: LimitedIntID
 
 
 class AltPriceRead(AltPriceCreate):
-    id: int
+    id: LimitedIntID
 
 
 class AltPriceUpdate(Config):
@@ -27,5 +25,5 @@ class AltPriceUpdate(Config):
     @classmethod
     def alt_price_not_null(cls, value: int | None) -> int:
         if value is None:
-            raise ValueError('alt_price cannot be null')
+            raise DomainValidationException('alt_price cannot be null')
         return value

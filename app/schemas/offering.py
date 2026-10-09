@@ -1,19 +1,7 @@
-from typing import Annotated
+from pydantic import field_validator, model_validator
 
-from pydantic import Field, field_validator, model_validator
-
+from app.schemas.domain_types import LimitedIntID, OfferingName, OfferingPrice
 from app.schemas.schemas_config import Config
-
-OfferingName = Annotated[
-    str,
-    Field(
-        min_length=1,
-        max_length=100,
-        description='Only latin, cyrillic, numeric and punctuation symbols.',
-    ),
-]
-
-OfferingPrice = Annotated[int, Field(ge=0, description='Price can not be less than zero')]
 
 
 class OfferingBase(Config):
@@ -30,7 +18,7 @@ class OfferingCreateDB(OfferingCreate):
 
 
 class OfferingRead(OfferingCreate):
-    id: int
+    id: LimitedIntID
 
 
 class OfferingUpdate(Config):
@@ -50,6 +38,12 @@ class OfferingUpdate(Config):
         if value is None:
             raise ValueError('offering_price cannot be null')
         return value
+
+    @model_validator(mode='after')
+    def at_least_one_field(self):
+        if not self.model_fields_set:
+            raise ValueError('at least one field must be provided')
+        return self
 
 
 class OfferingUpdateDB(OfferingUpdate):

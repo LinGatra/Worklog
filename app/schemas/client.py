@@ -1,17 +1,8 @@
-from typing import Annotated
+from pydantic import field_validator, model_validator
 
-from pydantic import Field, field_validator, model_validator
-
+from app.exception_handling.domain_exceptions import DomainValidationException
+from app.schemas.domain_types import ClientName, LimitedIntID
 from app.schemas.schemas_config import Config
-
-ClientName = Annotated[
-    str,
-    Field(
-        min_length=1,
-        max_length=100,
-        description='Only latin, cyrillic, numeric and punctuation symbols.',
-    ),
-]
 
 
 class ClientBase(Config):
@@ -22,12 +13,12 @@ class ClientCreate(ClientBase):
     pass
 
 
-class ClientCreateDB(ClientCreate):
+class ClientCreateDB(ClientBase):
     name_alias: str
 
 
-class ClientRead(ClientCreate):
-    id: int
+class ClientRead(ClientBase):
+    id: LimitedIntID
 
 
 class ClientUpdate(Config):
@@ -37,7 +28,7 @@ class ClientUpdate(Config):
     @classmethod
     def client_name_not_null(cls, value: str | None) -> str:
         if value is None:
-            raise ValueError('client_name cannot be null')
+            raise DomainValidationException('client_name cannot be null')
         return value
 
 
