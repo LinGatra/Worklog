@@ -27,8 +27,8 @@ async def unique_violation_handler(request: Request, exc: UniqueConstraintViolat
 
 async def not_null_handler(request: Request, exc: NotNullViolation):
     return JSONResponse(
-        status_code=400,
-        content={'error': {'code': 400, 'message': 'One of the key fields is passed as null'}},
+        status_code=422,
+        content={'error': {'code': 422, 'message': 'One of the key fields is passed as null'}},
     )
 
 
@@ -43,6 +43,6 @@ async def check_constraint_violation_handler(request: Request, exc: CheckConstra
 
 async def domain_validation_handler(request: Request, exc: DomainValidationException):
     return JSONResponse(
-        status_code=400,
-        content={'error': {'code': 400, 'message': 'The entered data has not been validated.'}},
+        status_code=422,
+        content={'error': {'code': 422, 'message': 'The entered data has not been validated.'}},
     )
