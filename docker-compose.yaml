@@ -54,7 +54,7 @@ services:
       start_period: 10s
     profiles: [ 'prod' ]
 
-  # --- БД для режима разработки ---
+  # --- dev ---
   db-dev:
     container_name: postgres_db_dev
     image: postgres:16-alpine
@@ -63,6 +63,8 @@ services:
       - pgdata_dev:/var/lib/postgresql/data
     networks:
       - app_network
+    ports:
+      - 15615:5432
     restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
@@ -72,7 +74,6 @@ services:
       start_period: 5s
     profiles: [ 'dev' ]
 
-  # --- dev ---
   alembic-dev:
     container_name: alembic_dev
     build:
