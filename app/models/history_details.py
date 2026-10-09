@@ -1,8 +1,10 @@
-from sqlalchemy import ForeignKey, Integer
-from sqlalchemy.orm import Mapped, mapped_column
+from __future__ import annotations
 
+from sqlalchemy import ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.models.base_model import Base
 from app.models.history import History
-from app.models.models_config import Base
 from app.models.offering import Offering
 
 
@@ -13,3 +15,5 @@ class HistoryDetails(Base):
     event_id: Mapped[int] = mapped_column(ForeignKey(History.id), nullable=False)
     offering_id: Mapped[int] = mapped_column(ForeignKey(Offering.id), nullable=False)
     offering_price: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    event: Mapped[History] = relationship('History', back_populates='details')

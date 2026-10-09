@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, CheckConstraint, Integer, String, false as sa_false
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.models_config import Base
+from app.models.base_model import Base
 
 
 class Client(Base):

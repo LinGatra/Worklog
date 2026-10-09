@@ -1,8 +1,8 @@
 from sqlalchemy import CheckConstraint, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.models.base_model import Base
 from app.models.client import Client
-from app.models.models_config import Base
 from app.models.offering import Offering
 
 
