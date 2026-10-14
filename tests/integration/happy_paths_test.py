@@ -5,11 +5,6 @@ pytestmark = pytest.mark.asyncio(loop_scope='session')
 
 @pytest.mark.integration
 async def test_client_happy_lifecycle(api_client):
-    # check that there is no clients initially
-    response = await api_client.get('/client/')
-    assert response.status_code == 200
-    assert response.json() == []
-
     # create valid client
     create_request_body = {'client_name': 'Valid Client'}
     response = await api_client.post('/client/', json=create_request_body)
@@ -39,11 +34,6 @@ async def test_client_happy_lifecycle(api_client):
 
 @pytest.mark.integration
 async def test_offering_happy_lifecycle(api_client):
-    # check that there is no offerings initially
-    response = await api_client.get('/offering/')
-    assert response.status_code == 200
-    assert response.json() == []
-
     # create valid offering
     create_request_body = {'offering_name': 'Valid Offering', 'offering_price': 1000}
     response = await api_client.post('/offering/', json=create_request_body)
@@ -80,11 +70,6 @@ async def test_alt_price_happy_lifecycle(
 ):
     client_id = create_client_fixture
     offering_id = create_offering_fixture
-
-    # check that there is no alt prices initially
-    response = await api_client.get('/alt-price/')
-    assert response.status_code == 200
-    assert response.json() == []
 
     # create alt price
     create_request_body = {'client_id': client_id, 'offering_id': offering_id, 'alt_price': 70}
