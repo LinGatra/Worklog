@@ -19,6 +19,6 @@ class History(Base):
     id: Mapped[int] = mapped_column('event_id', Integer, primary_key=True)
     client_id: Mapped[int] = mapped_column(ForeignKey(Client.id), nullable=False)
     final_price: Mapped[int] = mapped_column(Integer, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     details: Mapped[list[HistoryDetails]] = relationship('HistoryDetails', back_populates='event')
